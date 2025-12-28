@@ -1,4 +1,4 @@
 function changerMessage() {
     document.getElementById("message").innerText =
-        "✅ Jenkins a bien déclenché le pipeline ";
+        "✅ Jenkins a bien déclenché le pipeline !";
 }
