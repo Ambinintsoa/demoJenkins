@@ -1,34 +1,34 @@
 pipeline {
-    agent any
-
-    stages {
-
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo 'Vérification des fichiers du projet...'
-                sh 'ls -l'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                echo 'Build terminé (projet web statique)'
-            }
+ agent any
+ stages {
+  stage('Checkout') {
+    steps {
+        checkout scm
         }
     }
-
-    post {
-        success {
-            echo 'Pipeline exécuté avec succès'
-        }
-        failure {
-            echo 'Erreur dans le pipeline'
-        }
-    }
+  stage('Build & Test') {
+     steps {
+         sh 'mvn clean test'
+         }
+         }
+  stage('Package') {
+     steps {
+         sh 'mvn package -DskipTests'
+         }
+         }
+  stage('Docker Build') {
+     steps {
+         sh 'docker build -t spring-ci-cd:latest .'
+         }
+         }
+  stage('Deploy') {
+   steps {
+    sh '''
+    docker stop spring-app || true
+    docker rm spring-app || true
+    docker run -d -p 8082:8082 --name spring-app spring-ci-cd:latest
+    '''
+   }
+  }
+ }
 }
